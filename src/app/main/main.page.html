@@ -1,0 +1,321 @@
+<!--==================================Header==================================-->
+
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-grid>
+      <ion-row>
+        <ion-col class="ion-padding-vertical">
+          <ion-title>EditPdf</ion-title>
+        </ion-col>
+
+        <ion-col>
+          <div class="custom-file">
+              <input class="ion-padding-vertical" (change)="onFileSelected()" ng2FileSelect [uploader]="uploader"
+                type="file" class="custom-file-input" id="file" aria-describedby="inputGroupFileAddon01" />
+              <!--<ion-button class="input-group-text upload" (click)="uploader.uploadAll()" 
+                [disabled]="!uploader.getNotUploadedItems().length"
+                id="btnUpload">Upload</ion-button>-->
+              <ion-button color="default" (click)="callEditPDF()">Save</ion-button>
+              <ion-button color="default" (click)="downloadPDF()">Download</ion-button>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <!--==================================Side Tabs==================================-->
+
+  <ion-grid class="ion-no-margin ion-no-padding">
+    <ion-row>
+      <ion-col class="ion-no-margin ion-no-padding" size="3">
+        <ion-row>
+          <ion-col size="2" class="ion-no-margin ion-no-padding">
+            <ion-list>
+              <ion-button class="ion-padding-vertical" (click)="openTab('stickerTab')"
+                [color]="stickerTab ? 'primary' : 'light'">
+                <ion-icon name="heart-circle-outline"></ion-icon>
+              </ion-button>
+              <ion-button class="ion-padding-vertical" (click)="openTab('imageTab')"
+                [color]="imageTab ? 'primary' : 'light'">
+                <ion-icon name="image-outline"></ion-icon>
+              </ion-button>
+              <ion-button class="ion-padding-vertical" (click)="openTab('textTab')"
+                [color]="textTab ? 'primary' : 'light'">
+                <ion-icon name="text-outline"></ion-icon>
+              </ion-button>
+              <ion-button class="ion-padding-vertical" (click)="openTab('settingTab')"
+                [color]="textTab ? 'primary' : 'light'">
+                <ion-icon name="settings-outline"></ion-icon>
+              </ion-button>
+            </ion-list>
+          </ion-col>
+   <!--==================================Tab Content==================================-->
+          <!--==================================StickerTab==================================-->
+
+          <ion-col size="10">
+            <ion-grid class="my-grid" *ngIf="stickerTab">
+              <ion-row class="scrollbar parent-row" id="style-6">
+                <ion-col size="6" *ngFor="let emoji of emojiFiles">
+                  <ion-img [src]="'./assets/emoji/'+emoji" (click)="selectEmoji(emoji , $event)" ></ion-img>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>
+                  <h3>
+                    Selected Emoji<span *ngIf="selectedEmoji==''"> None</span>
+                  </h3>
+                  <div class="selectedEmoji" *ngIf="selectedEmoji!=''" cdkDrag style="z-index: 1000; position: relative"
+                    (cdkDragEnded)="onDragEnded($event)">
+                    <ion-img id="emojiImg" [src]="'./assets/emoji/'+selectedEmoji" style="width:100px!important; height:auto"></ion-img>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+            <!--==================================Text Tab==================================-->
+            <ion-grid *ngIf="textTab">
+              <ion-row>
+                <ion-col>
+                  <ion-item>
+                    <ion-label position="floating">Comments</ion-label>
+                    <ion-textarea [(ngModel)]="typedText"></ion-textarea>
+                  </ion-item>
+                  <br />
+                  <span>Choose Color</span><input type="color" [(ngModel)]="commentColor" id="favcolor" name="favcolor"
+                    value="#ff0000" /><br />
+                </ion-col>
+              </ion-row>
+              <br />
+              <ion-row>
+                <ion-col size="4">
+                  <ion-button (click)="commentFontStyle='italic'">Italic</ion-button>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-button (click)="commentFontStyle='normal'">Bold</ion-button>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-button (click)="commentFontStyle='oblique'">Oblique</ion-button>
+                </ion-col>
+              </ion-row>
+              <br />
+              <ion-row>
+                <ion-col size="4">
+                  <p>Text Size :</p>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-button (click)="commentFontSize=commentFontSize+1">+</ion-button>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-button (click)="commentFontSize=commentFontSize-1">-</ion-button>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-list>
+                  <ion-item>
+                    <h4>Comment</h4>
+                  </ion-item>
+                  <ion-item>
+                    <div style="height: 300px" cdkDrag style="z-index: 1000; position: relative">
+                      <p
+                        [ngStyle]="{'color':commentColor,'font-size.px':commentFontSize , 'font-style':commentFontStyle}">
+                        {{typedText}}
+                      </p>
+                    </div>
+                  </ion-item>
+                </ion-list>
+              </ion-row>
+            </ion-grid>
+            <!--==================================Image Tabs==================================-->
+            <ion-grid *ngIf="imageTab">
+              <ion-row>
+                <ion-col>
+                  <ion-item>
+                    <ion-input type="file" accept="image/*" (change)="changeListener($event)"></ion-input>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              <br />
+              <ion-row>
+                <div cdkDrag style="z-index: 1000; position: relative">
+                  <ion-img [src]="imgSrc" [ngStyle]="{'border-radius':circularImg+'%'}"></ion-img>
+                </div>
+              </ion-row>
+              <ion-row>
+                <h4>Change Shape</h4>
+                <ion-col size="6">
+                  <ion-button (click)="circularImg=50">Rounded</ion-button>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-button (click)="commentFontStyle='normal'">Star</ion-button>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-button (click)="commentFontStyle='oblique'">Normal</ion-button>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-button (click)="commentFontStyle='oblique'">Heart</ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+            <!--==================================PDF Settings==================================-->
+
+            <ion-grid *ngIf="settingTab">
+              <ion-row>
+                <ion-col size="12">
+                  <mat-slide-toggle [(ngModel)]="originalSize">
+                    Original size
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col size="12">
+                  <mat-slide-toggle [(ngModel)]="fitToPage">
+                    Fit to page
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col size="12">
+                  <mat-slide-toggle [(ngModel)]="renderText">
+                    Render text layer
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col size="12">
+                  <mat-slide-toggle [(ngModel)]="autoresize">
+                    Auto resize
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col size="12">
+                  <mat-slide-toggle [(ngModel)]="showAll">
+                    Show all pages
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col size="12">
+                  <mat-form-field *ngIf="!originalSize">
+                    <mat-label>Select an option</mat-label>
+                    <mat-select [(value)]="zoomScale">
+                      <mat-option value="page-width">Page Width</mat-option>
+                      <mat-option value="page-height">Page Height</mat-option>
+                      <mat-option value="page-fit">Page Fit</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ion-col>
+                <ion-col size="12">
+                  <button (click)="incrementZoom(-0.1)" mat-button type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                  </button>
+
+                  <mat-form-field class="page-number" style="width: 60px">
+                    <input matInput type="number" placeholder="Zoom" [(ngModel)]="zoom" pattern="-?[0-9]*(\.[0-9]+)?" />
+                    <mat-error>Input is not a number!</mat-error>
+                  </mat-form-field>
+
+                  <button (click)="incrementZoom(0.1)" mat-button type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      <line x1="11" y1="8" x2="11" y2="14"></line>
+                      <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                  </button>
+                </ion-col>
+                <ion-col *ngIf="showAll">
+                  <mat-slide-toggle [(ngModel)]="stickToPage">
+                    Stick to page
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col *ngIf="stickToPage && showAll || !showAll">
+                  <button (click)="incrementPage(-1)" mat-button type="button">
+                    Previous
+                  </button>
+
+                  <mat-form-field class="page-number" style="width: 60px">
+                    <input matInput type="number" placeholder="Page" [(ngModel)]="page" pattern="-?[0-9]*(\.[0-9]+)?" />
+                    <mat-error>Input is not a number!</mat-error>
+                  </mat-form-field>
+
+                  <span *ngIf="pdf">of {{ pdf.numPages }}</span>
+                  <button (click)="incrementPage(1)" mat-button type="button">
+                    Next
+                  </button>
+                </ion-col>
+                <ion-col size="12">
+                  <button (click)="rotate(-90)" mat-button type="button" matTooltip="Rotate left"
+                    [matTooltipPosition]="'above'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      transform="scale(-1,1)">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                  </button>
+
+                  <mat-form-field class="page-number" style="width: 60px">
+                    <input matInput type="number" placeholder="Rotation" [ngModel]="rotation" disabled />
+                    <mat-error>Input is not a number!</mat-error>
+                  </mat-form-field>
+
+                  <button (click)="rotate(90)" mat-button type="button" matTooltip="Rotate right"
+                    [matTooltipPosition]="'above'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                  </button>
+                </ion-col>
+                <ion-col *ngIf="showAll">
+                  <mat-slide-toggle [(ngModel)]="isOutlineShown">
+                    Show outline
+                  </mat-slide-toggle>
+                </ion-col>
+                <ion-col *ngIf="showAll && isOutlineShown">
+                  <ul *ngFor="let item of outline" class="outline-list">
+                    <li>
+                      <a (click)="navigateTo(item.dest)"> {{ item.title }} </a>
+
+                      <ul *ngFor="let child of item.items">
+                        <li>
+                          <a (click)="navigateTo(child.dest)">
+                            {{ child.title }}
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </ion-col>
+                <ion-col size="12">
+                  <mat-form-field>
+                    <input #queryInp matInput id="pdfQueryInput" type="text" placeholder="Search..." [value]="pdfQuery"
+                      (input)="searchQueryChanged($event.target.value)"
+                      (keyup.enter)="searchQueryChanged(queryInp.value)" />
+                    <mat-hint>Search in entire pdf</mat-hint>
+                  </mat-form-field>
+                </ion-col>
+                <ion-col size="12">
+                  <div *ngIf="!isLoaded && !error && progressData" id="progress">
+                    <div class="bg">
+                      <div class="bar" [style.width]="progressData.loaded / progressData.total * 100 + '%'"></div>
+                    </div>
+                    <span>{{ getInt(progressData.loaded / progressData.total * 100)
+                      }}%</span>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+      <!--==================================PDF Viewer==================================-->
+
+      <ion-col size="9" style="height: 90vh; overflow: auto; overflow-x: auto" id="pdfContainer">
+        <pdf-viewer #pdfViewerr  [src]="pdfSrc" [(page)]="page" [rotation]="rotation" [original-size]="originalSize"
+          [show-all]="showAll" [fit-to-page]="fitToPage" (after-load-complete)="afterLoadComplete($event)" [zoom]="zoom"
+          [zoom-scale]="zoomScale" [stick-to-page]="stickToPage" [render-text]="renderText"
+          [external-link-target]="'blank'" [autoresize]="autoresize" (page-rendered)="pageRendered($event)"
+       ></pdf-viewer>
+        </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
